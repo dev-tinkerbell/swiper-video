@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Swiper Video Slides</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swiper/swiper-bundle.min.css"
+    />
+    <style>
+      body {
+        margin: 0;
+      }
+      .video-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      .mute-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+      }
+      video {
+        width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        <div
+          class="swiper-slide"
+          data-fallback-url="https://www.w3schools.com/html/movie.mp4"
+        >
+          <div class="video-container">
+            <video
+              src="https://web-video-resource.gentlemonster.com/assets/stories/mugler-popup/mugler-video-pc.mp4"
+              muted
+              autoplay
+              playsinline
+              loop
+              preload="auto"
+              class="video"
+            ></video>
+            <button class="mute-button">Unmute</button>
+            <span class="isLoad">no</span>
+          </div>
+        </div>
+        <div
+          class="swiper-slide"
+          data-fallback-url="https://www.w3schools.com/html/movie.mp4"
+        >
+          <div class="video-container">
+            <video
+              src="https://web-video-resource.gentlemonster.com/assets/stories/bold_second/collection/campaign-video-new-02_01_pc.mp4"
+              muted
+              autoplay
+              playsinline
+              loop
+              preload="auto"
+              class="video"
+            ></video>
+            <button class="mute-button">Unmute</button>
+            <span class="isLoad">no</span>
+          </div>
+        </div>
+        <div
+          class="swiper-slide"
+          data-fallback-url="https://www.w3schools.com/html/movie.mp4"
+        >
+          <div class="video-container">
+            <video
+              src="https://web-video-resource.gentlemonster.com/assets/stories/jentle-salon/issue/jennie24-main-collection-ver1-pc.mp4"
+              muted
+              autoplay
+              playsinline
+              loop
+              preload="auto"
+              class="video"
+            ></video>
+            <button class="mute-button">Unmute</button>
+            <span class="isLoad">no</span>
+          </div>
+        </div>
+        <div
+          class="swiper-slide"
+          data-fallback-url="https://www.w3schools.com/html/movie.mp4"
+        >
+          <div class="video-container">
+            <video
+              src="https://web-video-resource.gentlemonster.com/assets/stories/bold_second/collection/campaign-video-new-02_03_pc.mp4"
+              muted
+              autoplay
+              playsinline
+              loop
+              preload="auto"
+              class="video"
+            ></video>
+            <button class="mute-button">Unmute</button>
+            <span class="isLoad">no</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script>
+      let isMuted = true; // 기본값은 음소거 상태
+      const timeoutDuration = 1000; // 1초
+
+      // 비디오 로드 시간을 측정하기 위한 변수
+      const loadStartTimes = {};
+
+      // Swiper 초기화
+      const swiper = new Swiper(".swiper-container", {
+        loop: false,
+        effect: "fade", // 페이드 인/아웃 효과
+        fadeEffect: {
+          crossFade: true, // 슬라이드 간 부드러운 전환
+        },
+        on: {
+          init: function () {
+            this.slides.forEach((slide) => {
+              const video = slide.querySelector("video");
+              video.muted = true;
+              video.pause(); // 다른 슬라이드의 비디오는 멈춤
+              loadStartTimes[video.src] = Date.now(); // 비디오 로드 시작 시간 기록
+            });
+
+            const currentSlide = this.slides[this.activeIndex];
+            const video = currentSlide.querySelector("video");
+            video.currentTime = 0;
+            video.play();
+          },
+          slideChange: function () {
+            // 모든 슬라이드의 비디오를 음소거 처리
+            this.slides.forEach((slide) => {
+              const video = slide.querySelector("video");
+              video.muted = true;
+              video.pause(); // 다른 슬라이드의 비디오는 멈춤
+            });
+
+            // 현재 활성화된 슬라이드의 비디오를 재생
+            const currentSlide = this.slides[this.activeIndex];
+            const video = currentSlide.querySelector("video");
+            video.currentTime = 0;
+            video.play();
+
+            // 비디오가 1초 이내에 재생되지 않으면 대체 비디오로 교체
+            const isLoadSpan = currentSlide.querySelector(".isLoad");
+            isLoadSpan.textContent = `1. ${video.readyState}`;
+            console.log("1", video.readyState);
+
+            setTimeout(() => {
+              isLoadSpan.textContent = `2. ${video.readyState}`;
+              console.log("2", video.readyState);
+
+              if (video.readyState < 3) {
+                // readyState가 3 미만이면 비디오가 준비되지 않았다는 의미
+                const fallbackUrl =
+                  currentSlide.getAttribute("data-fallback-url");
+                video.src = fallbackUrl;
+                video.load();
+                video.play();
+              }
+            }, timeoutDuration);
+          },
+        },
+      });
+
+      // 음소거/음소거 해제 버튼 동작
+      document.querySelectorAll(".mute-button").forEach((button) => {
+        button.addEventListener("click", function () {
+          const currentSlide = swiper.slides[swiper.activeIndex];
+          const video = currentSlide.querySelector("video");
+
+          if (isMuted) {
+            video.muted = false;
+            isMuted = false;
+            button.textContent = "Mute";
+          } else {
+            video.muted = true;
+            isMuted = true;
+            button.textContent = "Unmute";
+          }
+        });
+      });
+
+      // 슬라이드 변경 시 버튼 텍스트 업데이트
+      swiper.on("slideChange", function () {
+        const currentSlide = swiper.slides[swiper.activeIndex];
+        const video = currentSlide.querySelector("video");
+        const button = currentSlide.querySelector(".mute-button");
+
+        if (video.muted) {
+          button.textContent = "Unmute";
+        } else {
+          button.textContent = "Mute";
+        }
+      });
+    </script>
+  </body>
+</html>
