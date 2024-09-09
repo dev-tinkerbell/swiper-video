@@ -154,6 +154,7 @@
             const video = currentSlide.querySelector("video");
             video.currentTime = 0;
             video.play();
+            video.muted = isMuted;
 
             // 비디오가 1초 이내에 재생되지 않으면 대체 비디오로 교체
             const isLoadSpan = currentSlide.querySelector(".isLoad");
